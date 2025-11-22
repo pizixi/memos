@@ -12,37 +12,20 @@ import { visit } from "unist-util-visit";
  *   #2024_plans → <span class="tag" data-tag="2024_plans">#2024_plans</span>
  *   #work-notes → <span class="tag" data-tag="work-notes">#work-notes</span>
  *   #tag1/subtag/subtag2 → <span class="tag" data-tag="tag1/subtag/subtag2">#tag1/subtag/subtag2</span>
+ *   #中文标签 → <span class="tag" data-tag="中文标签">#中文标签</span>
  *
  * Rules:
- * - Tag must start with # followed by alphanumeric, underscore, hyphen, or forward slash
+ * - Tag must start with # followed by Unicode letters, numbers, underscore, hyphen, or forward slash
  * - Tag ends at whitespace, punctuation (except -, _, /), or end of line
  * - Tags at start of line after ## are headings, not tags
  */
 
 /**
  * Check if character is valid for tag content
- * Follows Twitter/social media standard: Unicode letters/digits, underscore, hyphen, slash
- * Stops at whitespace and punctuation
+ * Supports Unicode letters and numbers (including Chinese, Japanese, Korean, etc.)
  */
 function isTagChar(char: string): boolean {
-  // Allow: letters (Unicode), digits (Unicode), underscore, hyphen, forward slash
-  // Stop at: whitespace, punctuation
-
-  // Stop at whitespace
-  if (/\s/.test(char)) {
-    return false;
-  }
-
-  // Stop at common punctuation (ASCII and Unicode)
-  // U+3000-U+303F: CJK punctuation
-  // U+FF00-U+FF65: Fullwidth punctuation subset
-  const punctuation = /[.,;:!?()[\]{}<>"'`|\\@&*+=^%$~#\u3000-\u303F\uFF00-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65]/;
-  if (punctuation.test(char)) {
-    return false;
-  }
-
-  // Allow everything else (Unicode letters, digits, and allowed symbols like - _ /)
-  return true;
+  return /[\p{L}\p{N}_\-/]/u.test(char);
 }
 
 /**

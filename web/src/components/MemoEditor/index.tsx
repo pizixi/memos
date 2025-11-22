@@ -1,6 +1,6 @@
 import copy from "copy-to-clipboard";
 import { isEqual } from "lodash-es";
-import { LoaderIcon, Minimize2Icon } from "lucide-react";
+import { LoaderIcon, Maximize2Icon, Minimize2Icon } from "lucide-react";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -64,6 +64,7 @@ export interface Props {
   // The name of the parent memo if the memo is a comment.
   parentMemoName?: string;
   autoFocus?: boolean;
+  initialFocusMode?: boolean;
   onConfirm?: (memoName: string) => void;
   onCancel?: () => void;
 }
@@ -82,13 +83,13 @@ interface State {
 }
 
 const MemoEditor = observer((props: Props) => {
-  const { className, cacheKey, memoName, parentMemoName, autoFocus, onConfirm, onCancel } = props;
+  const { className, cacheKey, memoName, parentMemoName, autoFocus, initialFocusMode, onConfirm, onCancel } = props;
   const t = useTranslate();
   const { i18n } = useTranslation();
   const currentUser = useCurrentUser();
   const [state, setState] = useState<State>({
     memoVisibility: Visibility.PRIVATE,
-    isFocusMode: false,
+    isFocusMode: initialFocusMode || false,
     attachmentList: [],
     relationList: [],
     location: undefined,
@@ -600,7 +601,16 @@ const MemoEditor = observer((props: Props) => {
               onToggleFocusMode={toggleFocusMode}
             />
           </div>
-          <div className="shrink-0 flex flex-row justify-end items-center">
+          <div className="shrink-0 flex flex-row justify-end items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleFocusMode}
+              title={t("editor.focus-mode")}
+              className="opacity-60 hover:opacity-100"
+            >
+              <Maximize2Icon className="w-4 h-4" />
+            </Button>
             <VisibilitySelector value={state.memoVisibility} onChange={(visibility) => handleMemoVisibilityChange(visibility)} />
             <div className="flex flex-row justify-end gap-1">
               {props.onCancel && (

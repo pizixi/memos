@@ -3,6 +3,7 @@ package markdown
 import (
 	"bytes"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/yuin/goldmark"
 	gast "github.com/yuin/goldmark/ast"
@@ -394,10 +395,19 @@ func truncateAtWord(s string, maxLength int) string {
 		return s
 	}
 
-	// Truncate to max length
-	truncated := s[:maxLength]
+	// Truncate at valid UTF-8 boundary
+	truncated := s
+	if maxLength < len(s) {
+		// Find the last valid UTF-8 character boundary before maxLength
+		for i := maxLength; i > 0; i-- {
+			if utf8.RuneStart(s[i]) {
+				truncated = s[:i]
+				break
+			}
+		}
+	}
 
-	// Find last space
+	// Find last space within the truncated string
 	lastSpace := strings.LastIndexAny(truncated, " \t\n\r")
 	if lastSpace > 0 {
 		truncated = truncated[:lastSpace]

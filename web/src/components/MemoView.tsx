@@ -1,4 +1,4 @@
-import { BookmarkIcon, EyeOffIcon, MessageCircleMoreIcon } from "lucide-react";
+import { BookmarkIcon, EyeOffIcon, Maximize2Icon, MessageCircleMoreIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -43,6 +43,7 @@ const MemoView: React.FC<Props> = observer((props: Props) => {
   const currentUser = useCurrentUser();
   const user = useCurrentUser();
   const [showEditor, setShowEditor] = useState<boolean>(false);
+  const [startWithFocusMode, setStartWithFocusMode] = useState<boolean>(false);
   const [creator, setCreator] = useState(userStore.getUserByName(memo.creator));
   const [showNSFWContent, setShowNSFWContent] = useState(props.showNsfwContent);
   const [reactionSelectorOpen, setReactionSelectorOpen] = useState<boolean>(false);
@@ -112,6 +113,7 @@ const MemoView: React.FC<Props> = observer((props: Props) => {
 
   const onEditorConfirm = () => {
     setShowEditor(false);
+    setStartWithFocusMode(false);
     userStore.setStatsStateId();
   };
 
@@ -222,8 +224,12 @@ const MemoView: React.FC<Props> = observer((props: Props) => {
       className="mb-2"
       cacheKey={`inline-memo-editor-${memo.name}`}
       memoName={memo.name}
+      initialFocusMode={startWithFocusMode}
       onConfirm={onEditorConfirm}
-      onCancel={() => setShowEditor(false)}
+      onCancel={() => {
+        setShowEditor(false);
+        setStartWithFocusMode(false);
+      }}
     />
   ) : (
     <div
@@ -274,6 +280,18 @@ const MemoView: React.FC<Props> = observer((props: Props) => {
           )}
         </div>
         <div className="flex flex-row justify-end items-center select-none shrink-0 gap-2">
+          {!readonly && (
+            <button
+              className="flex flex-row justify-start items-center rounded-md p-1 hover:opacity-80 opacity-60"
+              onClick={() => {
+                setStartWithFocusMode(true);
+                setShowEditor(true);
+              }}
+              title={t("editor.focus-mode")}
+            >
+              <Maximize2Icon className="w-4 h-4 mx-auto text-muted-foreground" />
+            </button>
+          )}
           {currentUser && !isArchived && (
             <ReactionSelector
               className={cn("border-none w-auto h-auto", reactionSelectorOpen && "!block", "hidden group-hover:block")}
